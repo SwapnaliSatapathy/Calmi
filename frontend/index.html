@@ -108,10 +108,60 @@
         </div>
     </div>
 
+    <!-- Success Popup -->
+    <div class="success-popup" id="successPopup" role="status" aria-live="polite">
+        <div class="success-popup-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <div class="success-popup-body">
+            <h4 class="success-popup-title" id="successPopupTitle">Successfully Logged In!</h4>
+            <p class="success-popup-message" id="successPopupMessage">Welcome back to Calmi. Your peaceful space awaits.</p>
+        </div>
+        <button type="button" class="success-popup-close" onclick="closeSuccessPopup()" aria-label="Close notification">&times;</button>
+    </div>
+
     <script>
         // ------------------------- JS Logic -------------------------
         let authMode = 'login';
         let isLoggedIn = false;
+        let popupTimer = null;
+
+        function showSuccessPopup(title, message) {
+            const popup = document.getElementById('successPopup');
+            const titleEl = document.getElementById('successPopupTitle');
+            const messageEl = document.getElementById('successPopupMessage');
+
+            if (!popup || !titleEl || !messageEl) return;
+
+            if (popupTimer) {
+                clearTimeout(popupTimer);
+                popupTimer = null;
+            }
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            popup.classList.remove('show');
+            void popup.offsetWidth;
+            popup.classList.add('show');
+
+            popupTimer = setTimeout(() => {
+                closeSuccessPopup();
+            }, 3500);
+        }
+
+        function closeSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            if (popup) {
+                popup.classList.remove('show');
+            }
+            if (popupTimer) {
+                clearTimeout(popupTimer);
+                popupTimer = null;
+            }
+        }
 
         function toggleMobileMenu() {
             const navMenu = document.getElementById('navMenu');
@@ -175,7 +225,12 @@
                     return;
                 }
 
-                alert(data.message);
+                if (authMode === 'login') {
+                    showSuccessPopup("Successfully Logged In!", "Welcome back to Calmi. Your peaceful space awaits.");
+                } else {
+                    showSuccessPopup("Account Created Successfully!", "Welcome to Calmi! Your wellness journey starts here.");
+                }
+
                 closeAuthModal();
                 isLoggedIn = true;
                 document.getElementById('authButton').style.display = 'none';
