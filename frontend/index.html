@@ -277,19 +277,39 @@
             }
         }
 
-        function clearChat() {
+       
+        async function clearChat() {
             const messagesContainer = document.getElementById('chatMessages');
-            messagesContainer.innerHTML = '';
-            const botMessage = document.createElement('div');
-            botMessage.className = 'message bot-message';
-            botMessage.innerHTML = `
-                <div class="message-content">
-                    <p>Hi! I'm Calmi. How can I help you today?</p>
-                    <span class="message-time"></span>
-                </div>
-            `;
-            messagesContainer.appendChild(botMessage);
+
+            try {
+                const res = await fetch('/api/clear-chat', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.message || 'Failed to clear chat.');
+                    return;
+                }
+
+                messagesContainer.innerHTML = `
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <p>Hi! I'm Calmi. How can I help you today?</p>
+                            <span class="message-time"></span>
+                        </div>
+                    </div>
+                `;
+
+                console.log('Chat cleared:', data);
+            } catch (err) {
+                console.error('Error clearing chat:', err);
+                alert('Could not clear chat. Please try again.');
+            }
         }
+
 
         document.getElementById('chatButton').addEventListener('click', openChat);
     </script>
