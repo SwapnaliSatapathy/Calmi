@@ -63,8 +63,10 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: "email is required" })
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required."
+            });
         }
 
         const user = await User.findOne({email});
@@ -82,17 +84,17 @@ const loginUser = async (req, res) => {
 
         const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
-        //send cookies
-        const options = {
+        const cookieOptions = {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax"
-        }
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
+        };
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
+            .cookie("accessToken", accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
             .json({
                 message: "User logged in successfully",
                 user: { id: loggedInUser._id, name: loggedInUser.fullName, email: loggedInUser.email }
@@ -106,7 +108,6 @@ const loginUser = async (req, res) => {
 
 //logout controller
 const logoutUser = async(req, res) => {
-    console.log("req.user:", req.user);
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -119,16 +120,17 @@ const logoutUser = async(req, res) => {
         }
     )
 
-    const options = {
+    const cookieOptions = {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-    }
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/"
+    };
 
     return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json({message:"user logged out successfully"})
 }
 

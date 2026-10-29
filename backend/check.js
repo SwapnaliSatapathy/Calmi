@@ -8,9 +8,6 @@ const __dirname = path.dirname(__filename);
 // Path to frontend
 const frontendPath = path.join(__dirname, '../frontend');
 
-console.log("Backend __dirname:", __dirname);
-console.log("Expected frontend path:", frontendPath);
-
 // List files in frontend folder
 if (fs.existsSync(frontendPath)) {
   const files = fs.readdirSync(frontendPath);

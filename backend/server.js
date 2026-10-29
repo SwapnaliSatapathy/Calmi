@@ -1,5 +1,5 @@
 import express from "express";
-import dotenv from "dotenv";
+import "dotenv/config";
 import connectDB from "./config/connectionDB.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -10,8 +10,6 @@ import { fileURLToPath } from "url";
 // Routes
 import userRouter from "./routes/user.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
-
-dotenv.config();
 
 const PORT = process.env.PORT || 5004;
 const app = express();
@@ -32,12 +30,6 @@ const __dirname = path.dirname(__filename);
 
 // Frontend folder
 const frontendPath = path.join(__dirname, "../frontend");
-
-// Debug logs (optional, helps check paths)
-console.log("Backend __dirname:", __dirname);
-console.log("Expected frontend path:", frontendPath);
-console.log("Frontend folder exists:", fs.existsSync(frontendPath));
-console.log("index.html exists:", fs.existsSync(path.join(frontendPath, "index.html")));
 
 // Serve frontend safely
 if (fs.existsSync(path.join(frontendPath, "index.html"))) {
@@ -67,4 +59,5 @@ connectDB()
   })
   .catch((err) => {
     console.error("Database connection failed:", err);
+    process.exit(1);
   });

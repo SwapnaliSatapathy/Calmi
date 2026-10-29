@@ -112,10 +112,12 @@ export const chatWithGemini = async (req, res) => {
     }
 
     // Chronological order, oldest first, matching how Gemini expects history.
-    const previousChats = await Chat.find({ userId })
-      .sort({ timestamp: -1 })
-      .limit(5)
-      .lean();
+    const previousChats = (
+      await Chat.find({ userId })
+        .sort({ timestamp: -1 })
+        .limit(5)
+        .lean()
+    ).reverse();
 
     const geminiHistory = toGeminiHistory(previousChats);
 
@@ -137,10 +139,6 @@ export const chatWithGemini = async (req, res) => {
       const chatSession = model.startChat({ history: geminiHistory, generationConfig });
       const result = await chatSession.sendMessage(userMessage);
       const candidate = result.response.candidates?.[0];
-
-      console.log("Gemini finish reason:", candidate?.finishReason);
-      console.log("Gemini raw reply:", JSON.stringify(result.response.text()));
-      console.log("Gemini usage:", result.response.usageMetadata);
       const text = result.response.text()?.trim();
       if (text) {
         botReply = text;
@@ -205,8 +203,9 @@ export const chatWithGemini = async (req, res) => {
     res.status(200).json({ reply: botReply });
   } catch (error) {
     console.error("Chat controller error:", error);
+
     res.status(500).json({
-      message: error.message || "Something went wrong with Gemini API.",
+      message: "Something went wrong. Please try again later",
     });
   }
 };
@@ -222,7 +221,6 @@ export const clearChat = async (req, res) => {
 
     const result = await Chat.deleteMany({ userId });
 
-    console.log("Deleted count:", result.deletedCount);
     res.status(200).json({ message: "Chat cleared successfully" });
   } catch (error) {
     console.error("Error clearing chat:", error);
